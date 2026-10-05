@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: eiv
+      POSTGRES_USER: eiv
+      POSTGRES_PASSWORD: eiv
+    ports:
+      - "5432:5432"
+    volumes:
+      - dados-eiv:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eiv -d eiv"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_URL: jdbc:postgresql://db:5432/eiv
+      DB_USER: eiv
+      DB_PASSWORD: eiv
+    ports:
+      - "8080:8080"
+
+volumes:
+  dados-eiv:
